@@ -15,7 +15,11 @@
 
 ## 截图
 
-(待补充)
+| 会话列表(服务器折叠 + 项目分组) | 聊天界面 |
+|:---:|:---:|
+| <img src="docs/screenshot_list.jpg" width="240"> | <img src="docs/screenshot_chat.jpg" width="240"> |
+
+> 截图已脱敏处理(真实会话内容模糊)。
 
 ## 使用前提
 
