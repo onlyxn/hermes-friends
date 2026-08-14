@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="76dp"
+    android:layout_height="76dp"
+    android:layout_margin="4dp"
+    android:background="#E8E8E8"
+    android:padding="2dp">
+
+    <ImageView
+        android:id="@+id/attThumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="attachment" />
+
+    <TextView
+        android:id="@+id/attName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#66000000"
+        android:textColor="#FFFFFF"
+        android:textSize="9sp"
+        android:maxLines="1"
+        android:ellipsize="middle"
+        android:padding="2dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/attRemove"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="top|end"
+        android:background="@drawable/bg_remove"
+        android:text="×"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</FrameLayout>

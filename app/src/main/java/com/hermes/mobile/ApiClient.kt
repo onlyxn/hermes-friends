@@ -301,6 +301,25 @@ class ApiClient(private val context: Context, val server: ServerConfig) {
             }
         }
 
+    /** 🖼 批量发送多张图片 + 文字: 一次 wsRpc 里逐张 attach, 最后 submit */
+    suspend fun sendImagesBatch(
+        sessionId: String,
+        imagePaths: List<String>,
+        caption: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            if (imagePaths.isEmpty()) return@withContext false
+            val calls = mutableListOf<Map<String, Any>>()
+            imagePaths.forEach { path ->
+                calls.add(mapOf("method" to "image.attach", "params" to mapOf("session_id" to sessionId, "path" to path)))
+            }
+            calls.add(mapOf("method" to "prompt.submit", "params" to mapOf("session_id" to sessionId, "text" to caption)))
+            wsRpc(sessionId, calls)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     /** 🧩 通用 WebSocket RPC 调用(按顺序发送多个方法,等最后一个响应)
      *  skipResume=true: 跳过 session.resume(用于刚创建尚未落库的会话,直接用内存短 id) */
     private suspend fun wsRpc(
@@ -456,28 +475,33 @@ class ApiClient(private val context: Context, val server: ServerConfig) {
         delete("/api/sessions/$sessionId")
     }
 
-    /** ⬇ 下载服务器文件到本地,返回文件路径 */
+    /** ⬇ 下载服务器文件到本地 */
     suspend fun downloadFile(serverPath: String, localFile: java.io.File): Boolean =
         withContext(Dispatchers.IO) {
-            try {
-                val req = Request.Builder()
-                    .url(baseUrl + "/api/files/download?path=" + java.net.URLEncoder.encode(serverPath, "UTF-8"))
-                    .get()
-                    .build()
-                client.newCall(req).execute().use { resp ->
-                    if (!resp.isSuccessful) return@withContext false
-                    localFile.parentFile?.mkdirs()
-                    resp.body?.byteStream()?.use { input ->
-                        localFile.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                    true
-                }
-            } catch (e: Exception) {
-                false
-            }
+            downloadFileSync(serverPath, localFile)
         }
+
+    /** ⬇ 同步下载文件 */
+    fun downloadFileSync(serverPath: String, localFile: java.io.File): Boolean {
+        return try {
+            val req = Request.Builder()
+                .url(baseUrl + "/api/files/download?path=" + java.net.URLEncoder.encode(serverPath, "UTF-8"))
+                .get()
+                .build()
+            client.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) return false
+                localFile.parentFile?.mkdirs()
+                resp.body?.byteStream()?.use { input ->
+                    localFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     /** ⬇ 下载到 MediaStore 公共下载目录(Android 10+,免存储权限),返回保存的 URI */
     suspend fun downloadFileToMediaStore(
@@ -515,6 +539,124 @@ class ApiClient(private val context: Context, val server: ServerConfig) {
         wsRpc(sessionId, listOf(
             mapOf("method" to "prompt.submit", "params" to mapOf("session_id" to sessionId, "text" to text))
         ))
+
+    /** 🌊 发送消息并监听 running 状态(官方事件驱动, 桌面端同款机制)
+     *  保持 WebSocket 连接, session.info 的 running=true → "…"气泡; running=false → 移除 */
+    suspend fun sendMessageWithStatus(
+        sessionId: String,
+        text: String,
+        onRunning: (Boolean) -> Unit,
+        onDone: () -> Unit,
+        onError: (String) -> Unit
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val ticketResp = post("/api/auth/ws-ticket", JSONObject())
+            val ticket = ticketResp.optString("ticket")
+            if (ticket.isEmpty()) return@withContext false
+
+            val wsUrl = baseUrl.replace("http", "ws") + "/api/ws?ticket=" + ticket
+            val req = Request.Builder().url(wsUrl).build()
+            val done = java.util.concurrent.CountDownLatch(1)
+            val messageText = text
+            val ws = client.newWebSocket(req, object : okhttp3.WebSocketListener() {
+                var submitted = false
+                var liveSid = ""
+                var wasRunning = false
+
+                override fun onOpen(webSocket: okhttp3.WebSocket, response: okhttp3.Response) {
+                    val resume = org.json.JSONObject().apply {
+                        put("jsonrpc", "2.0")
+                        put("id", 1)
+                        put("method", "session.resume")
+                        put("params", org.json.JSONObject().apply {
+                            put("session_id", sessionId)
+                        })
+                    }
+                    webSocket.send(resume.toString())
+                }
+
+                override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
+                    try {
+                        val obj = org.json.JSONObject(text)
+                        val id = obj.optInt("id", -1)
+                        val method = obj.optString("method")
+
+                        if (id == 1 && obj.has("result") && !submitted) {
+                            submitted = true
+                            liveSid = obj.getJSONObject("result")
+                                .optString("session_id").ifEmpty { sessionId }
+                            val submit = org.json.JSONObject().apply {
+                                put("jsonrpc", "2.0")
+                                put("id", 2)
+                                put("method", "prompt.submit")
+                                put("params", org.json.JSONObject().apply {
+                                    put("session_id", liveSid)
+                                    put("text", messageText)
+                                })
+                            }
+                            webSocket.send(submit.toString())
+                            return
+                        }
+
+                        if (method == "event") {
+                            val params = obj.getJSONObject("params")
+                            val type = params.optString("type")
+                            val payload = params.optJSONObject("payload")
+                            when (type) {
+                                // ★ 核心: message.start = turn 开始(工作), message.complete = turn 完成
+                                // (turn 开始不发 session.info, 只发 message.start — 桌面端流光边框的真源)
+                                "message.start" -> {
+                                    if (!wasRunning) {
+                                        wasRunning = true
+                                        onRunning(true)
+                                    }
+                                }
+                                "message.complete" -> {
+                                    if (wasRunning) {
+                                        wasRunning = false
+                                        onRunning(false)
+                                    }
+                                    onDone()
+                                    done.countDown()
+                                }
+                                "error" -> {
+                                    onError(payload?.optString("message") ?: "未知错误")
+                                    done.countDown()
+                                }
+                            }
+                            return
+                        }
+
+                        if (id == 2 && obj.has("error")) {
+                            onError(obj.getJSONObject("error").optString("message", "提交失败"))
+                            done.countDown()
+                        }
+                    } catch (e: Exception) {
+                    }
+                }
+
+                override fun onFailure(
+                    webSocket: okhttp3.WebSocket,
+                    t: Throwable,
+                    response: okhttp3.Response?
+                ) {
+                    onError(t.message ?: "连接失败")
+                    done.countDown()
+                }
+            })
+
+            if (!done.await(300, java.util.concurrent.TimeUnit.SECONDS)) {
+                ws.cancel()
+                return@withContext false
+            }
+            ws.close(1000, "done")
+            ws.cancel()
+            true
+        } catch (e: Exception) {
+            onError(e.message ?: "发送失败")
+            false
+        }
+    }
 
     /** 给刚创建(未落库)的会话发消息: 跳过 resume,直接用内存短 id submit */
     suspend fun sendMessageNewSession(sessionId: String, text: String): Boolean =

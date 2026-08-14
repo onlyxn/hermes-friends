@@ -85,4 +85,7 @@
     <string name="attach_camera">📷 Take photo</string>
     <string name="attach_gallery">🖼 Choose from gallery</string>
     <string name="attach_file">📁 Send file</string>
+    <string name="hint_caption">Add a caption (optional)…</string>
+    <string name="view_original">View original</string>
+    <string name="loading_original">Loading original…</string>
 </resources>

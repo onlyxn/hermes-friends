@@ -85,4 +85,7 @@
     <string name="attach_camera">📷 拍照</string>
     <string name="attach_gallery">🖼 从相册选择</string>
     <string name="attach_file">📁 发送文件</string>
+    <string name="hint_caption">输入说明文字(可选)…</string>
+    <string name="view_original">查看原图</string>
+    <string name="loading_original">正在加载原图…</string>
 </resources>
