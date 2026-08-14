@@ -1,4 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hermes 好友</string>
+
+    <!-- 登录/添加服务器 -->
+    <string name="add_server_title">添加 Hermes 服务器</string>
+    <string name="hint_server">服务器地址 (如 http://10.10.10.150:9119)</string>
+    <string name="hint_username">账号</string>
+    <string name="hint_password">密码</string>
+    <string name="btn_add_server">添加服务器</string>
+    <string name="cd_back">返回</string>
+    <string name="fill_all">请填写服务器、账号、密码</string>
+    <string name="server_added">服务器已添加</string>
+    <string name="login_failed">登录失败: 账号或密码错误</string>
+    <string name="conn_failed">连接失败: %1$s</string>
+    <string name="login_expired">登录已过期</string>
+
+    <!-- 会话列表 -->
+    <string name="sessions_title">会话</string>
+    <string name="cd_new_session">新建会话</string>
+    <string name="cd_logout">退出登录</string>
+    <string name="loading">加载中…</string>
+    <string name="server_not_found">服务器不存在</string>
+    <string name="session_deleted">会话已删除</string>
+    <string name="delete_failed">删除失败: %1$s</string>
+    <string name="delete_session_title">删除会话?</string>
+    <string name="delete_session_msg">"%1$s" 的对话记录将被删除(桌面端同步删除),确定吗?</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="rename">✏️ 重命名</string>
+    <string name="delete_server">🗑 删除服务器</string>
+    <string name="server_deleted">服务器已删除</string>
+    <string name="rename_server_title">重命名服务器</string>
+    <string name="save">保存</string>
+    <string name="name_empty">名称不能为空</string>
+    <string name="renamed">已重命名</string>
+
+    <!-- "+" 菜单 -->
+    <string name="add_menu_title">添加</string>
+    <string name="add_server">➕ 添加服务器</string>
+    <string name="new_chat_to">💬 创建新对话到…</string>
+    <string name="choose_server">选择服务器</string>
+    <string name="choose_group">选择项目组</string>
+    <string name="hint_first_msg">输入第一句话…</string>
+    <string name="new_session_in">新会话 → %1$s</string>
+    <string name="create">创建</string>
+    <string name="first_msg_empty">请输入第一句话</string>
+    <string name="create_failed">创建失败(检查连接)</string>
+    <string name="session_created">会话已创建</string>
+    <string name="create_failed_first_msg">会话已创建,但首条消息发送失败</string>
+
+    <!-- 聊天 -->
+    <string name="hint_message">输入消息…</string>
+    <string name="btn_send">发送</string>
+    <string name="cd_attach">发送图片或文件</string>
+    <string name="download_attachment">⬇ 下载附件</string>
+    <string name="download_attachment_n">⬇ 下载附件 (%1$d个)</string>
+    <string name="download_failed">下载失败</string>
+    <string name="saved_to">已保存: Download/%1$s</string>
+    <string name="no_app_to_open">已保存,但找不到能打开的应用</string>
+    <string name="downloading">下载中…</string>
+    <string name="need_install_perm">需要安装权限</string>
+    <string name="install_perm_prompt">安装 APK 需要开启「允许安装未知应用」权限,现在去设置吗?</string>
+    <string name="go_enable">去开启</string>
+    <string name="downloaded_installing">已下载,开始安装…</string>
+    <string name="msg_failed">发送失败: %1$s</string>
+    <string name="load_failed">加载消息失败: %1$s</string>
+    <string name="image_or_file">(图片/文件)</string>
+    <string name="img_uploading">上传图片中…</string>
+    <string name="img_sent">图片已发送</string>
+    <string name="no_camera">没有可用的相机</string>
+    <string name="pick_image">选择图片</string>
+    <string name="pick_file">选择文件</string>
+    <string name="camera_failed">拍照失败</string>
+    <string name="read_image_failed">读取图片失败</string>
+    <string name="file_uploading">上传文件中…</string>
+    <string name="read_file_failed">读取文件失败</string>
+    <string name="upload_failed">上传失败</string>
+    <string name="file_uploaded">上传了文件: %1$s</string>
+    <string name="file_sent">文件已发送</string>
+    <string name="untitled">未命名</string>
+
+    <!-- 附件菜单 -->
+    <string name="attach_menu_title">发送附件</string>
+    <string name="attach_camera">📷 拍照</string>
+    <string name="attach_gallery">🖼 从相册选择</string>
+    <string name="attach_file">📁 发送文件</string>
 </resources>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hermes Friends</string>
+
+    <!-- Login / Add server -->
+    <string name="add_server_title">Add Hermes Server</string>
+    <string name="hint_server">Server address (e.g. http://10.10.10.150:9119)</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_add_server">Add Server</string>
+    <string name="cd_back">Back</string>
+    <string name="fill_all">Please fill in server, username and password</string>
+    <string name="server_added">Server added</string>
+    <string name="login_failed">Login failed: wrong username or password</string>
+    <string name="conn_failed">Connection failed: %1$s</string>
+    <string name="login_expired">Session expired</string>
+
+    <!-- Session list -->
+    <string name="sessions_title">Sessions</string>
+    <string name="cd_new_session">New session</string>
+    <string name="cd_logout">Log out</string>
+    <string name="loading">Loading…</string>
+    <string name="server_not_found">Server not found</string>
+    <string name="session_deleted">Session deleted</string>
+    <string name="delete_failed">Delete failed: %1$s</string>
+    <string name="delete_session_title">Delete session?</string>
+    <string name="delete_session_msg">"%1$s" and its history will be deleted (synced to desktop). Continue?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="rename">✏️ Rename</string>
+    <string name="delete_server">🗑 Delete server</string>
+    <string name="server_deleted">Server deleted</string>
+    <string name="rename_server_title">Rename server</string>
+    <string name="save">Save</string>
+    <string name="name_empty">Name cannot be empty</string>
+    <string name="renamed">Renamed</string>
+
+    <!-- "+" menu -->
+    <string name="add_menu_title">Add</string>
+    <string name="add_server">➕ Add server</string>
+    <string name="new_chat_to">💬 New chat in…</string>
+    <string name="choose_server">Choose server</string>
+    <string name="choose_group">Choose project group</string>
+    <string name="hint_first_msg">Type the first message…</string>
+    <string name="new_session_in">New session → %1$s</string>
+    <string name="create">Create</string>
+    <string name="first_msg_empty">Please type the first message</string>
+    <string name="create_failed">Create failed (check connection)</string>
+    <string name="session_created">Session created</string>
+    <string name="create_failed_first_msg">Session created, but the first message failed to send</string>
+
+    <!-- Chat -->
+    <string name="hint_message">Type a message…</string>
+    <string name="btn_send">Send</string>
+    <string name="cd_attach">Send image or file</string>
+    <string name="download_attachment">⬇ Download</string>
+    <string name="download_attachment_n">⬇ Download (%1$d)</string>
+    <string name="download_failed">Download failed</string>
+    <string name="saved_to">Saved: Download/%1$s</string>
+    <string name="no_app_to_open">Saved, but no app found to open it</string>
+    <string name="downloading">Downloading…</string>
+    <string name="need_install_perm">Install permission needed</string>
+    <string name="install_perm_prompt">Installing APKs requires the "Install unknown apps" permission. Open settings now?</string>
+    <string name="go_enable">Go to settings</string>
+    <string name="downloaded_installing">Downloaded, installing…</string>
+    <string name="msg_failed">Send failed: %1$s</string>
+    <string name="load_failed">Failed to load messages: %1$s</string>
+    <string name="image_or_file">(image/file)</string>
+    <string name="img_uploading">Uploading image…</string>
+    <string name="img_sent">Image sent</string>
+    <string name="no_camera">No camera available</string>
+    <string name="pick_image">Choose image</string>
+    <string name="pick_file">Choose file</string>
+    <string name="camera_failed">Camera failed</string>
+    <string name="read_image_failed">Failed to read image</string>
+    <string name="file_uploading">Uploading file…</string>
+    <string name="read_file_failed">Failed to read file</string>
+    <string name="upload_failed">Upload failed</string>
+    <string name="file_uploaded">Uploaded file: %1$s</string>
+    <string name="file_sent">File sent</string>
+    <string name="untitled">Untitled</string>
+
+    <!-- Attach menu -->
+    <string name="attach_menu_title">Send attachment</string>
+    <string name="attach_camera">📷 Take photo</string>
+    <string name="attach_gallery">🖼 Choose from gallery</string>
+    <string name="attach_file">📁 Send file</string>
+</resources>

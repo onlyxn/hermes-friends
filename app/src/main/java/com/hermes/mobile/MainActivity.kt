@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
         // 找到会话所属服务器,用它的 ApiClient
         val server = serverStore.get(s.serverId)
         if (server == null) {
-            toast("服务器不存在")
+            toast(getString(R.string.server_not_found))
             return
         }
         currentApi = ApiClient(this, server)
@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
         val user = etUser.text.toString().trim()
         val pass = etPass.text.toString()
         if (server.isEmpty() || user.isEmpty() || pass.isEmpty()) {
-            toast("请填写服务器、账号、密码")
+            toast(getString(R.string.fill_all))
             return
         }
         // 新建服务器配置并登录
@@ -182,17 +182,17 @@ class MainActivity : AppCompatActivity() {
                 if (ok) {
                     cfg.loggedIn = true
                     serverStore.add(cfg)
-                    toast("服务器已添加")
+                    toast(getString(R.string.server_added))
                     etServer.setText("")
                     etUser.setText("")
                     etPass.setText("")
                     showList()
                     refreshAllServers()
                 } else {
-                    toast("登录失败: 账号或密码错误")
+                    toast(getString(R.string.login_failed))
                 }
             } catch (e: Exception) {
-                toast("连接失败: ${e.message}")
+                toast(getString(R.string.conn_failed, e.message))
             }
         }
     }
@@ -319,9 +319,9 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: ApiClient.UnauthorizedException) {
                 showLogin()
-                toast("登录已过期,请重新登录")
+                toast(getString(R.string.login_expired))
             } catch (e: Exception) {
-                toast("加载消息失败: ${e.message}")
+                toast(getString(R.string.load_failed, e.message))
             } finally {
                 after()
             }
@@ -359,7 +359,7 @@ class MainActivity : AppCompatActivity() {
                 delay(800)
                 refreshMessages()
             } catch (e: Exception) {
-                toast("发送失败: ${e.message}")
+                toast(getString(R.string.msg_failed, e.message))
             }
         }
     }
@@ -367,10 +367,10 @@ class MainActivity : AppCompatActivity() {
     /** "+"菜单: 添加服务器 / 创建新对话到... */
     private fun showAddMenu() {
         val servers = serverStore.loadAll().filter { it.loggedIn }
-        val options = mutableListOf("➕ 添加服务器")
-        if (servers.isNotEmpty()) options.add("💬 创建新对话到…")
+        val options = mutableListOf(getString(R.string.add_server))
+        if (servers.isNotEmpty()) options.add(getString(R.string.new_chat_to))
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("添加")
+            .setTitle(getString(R.string.add_menu_title))
             .setItems(options.toTypedArray()) { _, which ->
                 when (which) {
                     0 -> showLogin()
@@ -385,7 +385,7 @@ class MainActivity : AppCompatActivity() {
         // 第一步: 选服务器
         val names = servers.map { it.name }.toTypedArray()
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("选择服务器")
+            .setTitle(getString(R.string.choose_server))
             .setItems(names) { _, which ->
                 val server = servers[which]
                 // 第二步: 选组(该服务器的项目组)
@@ -396,7 +396,7 @@ class MainActivity : AppCompatActivity() {
                     return@setItems
                 }
                 androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
-                    .setTitle("选择项目组")
+                    .setTitle(getString(R.string.choose_group))
                     .setItems(groups.toTypedArray()) { _, g ->
                         createSessionInGroup(server, groups[g])
                     }
@@ -408,14 +408,14 @@ class MainActivity : AppCompatActivity() {
     /** 创建新会话: 输入第一句话(发送后立即落库,避免懒创建404) */
     private fun createSessionInGroup(server: ServerConfig, group: String) {
         val input = EditText(this)
-        input.hint = "输入第一句话…"
+        input.hint = getString(R.string.hint_first_msg)
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("新会话 → $group")
+            .setTitle(getString(R.string.new_session_in, group))
             .setView(input)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(getString(R.string.create)) { _, _ ->
                 val firstMsg = input.text.toString().trim()
                 if (firstMsg.isEmpty()) {
-                    toast("请输入第一句话")
+                    toast(getString(R.string.first_msg_empty))
                     return@setPositiveButton
                 }
                 val client = ApiClient(this, server)
@@ -427,12 +427,12 @@ class MainActivity : AppCompatActivity() {
                         if (sent) {
                             // 发送成功 → 服务器已落库,不插入本地假条目(避免出现两个窗口)
                             // 等刷新拉到正式条目
-                            toast("会话已创建")
+                            toast(getString(R.string.session_created))
                             delay(1500)
                             refreshAllServers()
                         } else {
                             // 发送失败 → 本地兜底插入,用户还能看到并重试
-                            toast("会话已创建,但首条消息发送失败")
+                            toast(getString(R.string.create_failed_first_msg))
                             val sessions = serverSessions.getOrPut(server.id) { mutableListOf() }
                             sessions.add(
                                 0, HermesSession(
@@ -450,23 +450,23 @@ class MainActivity : AppCompatActivity() {
                             refreshAllServers()
                         }
                     } else {
-                        toast("创建失败(检查连接)")
+                        toast(getString(R.string.create_failed))
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
     /** 会话长按: 删除 */
     private fun showSessionActions(session: HermesSession) {
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("删除会话?")
-            .setMessage("\"${session.displayName}\" 的对话记录将被删除(桌面端同步删除),确定吗?")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(getString(R.string.delete_session_title))
+            .setMessage(getString(R.string.delete_session_msg, session.displayName))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 val server = serverStore.get(session.serverId)
                 if (server == null) {
-                    toast("服务器不存在")
+                    toast(getString(R.string.server_not_found))
                     return@setPositiveButton
                 }
                 val client = ApiClient(this, server)
@@ -476,19 +476,19 @@ class MainActivity : AppCompatActivity() {
                         // 本地移除
                         serverSessions[session.serverId]?.removeAll { it.id == session.id }
                         rebuildSessionRows()
-                        toast("会话已删除")
+                        toast(getString(R.string.session_deleted))
                     } catch (e: Exception) {
-                        toast("删除失败: ${e.message}")
+                        toast(getString(R.string.delete_failed, e.message))
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
     /** 服务器长按: 重命名 / 删除 */
     private fun showServerActions(server: ServerConfig) {
-        val options = arrayOf("✏️ 重命名", "🗑 删除服务器")
+        val options = arrayOf(getString(R.string.rename), getString(R.string.delete_server))
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(server.name)
             .setItems(options) { _, which ->
@@ -499,7 +499,7 @@ class MainActivity : AppCompatActivity() {
                         serverSessions.remove(server.id)
                         collapsedServers.remove(server.id)
                         rebuildSessionRows()
-                        toast("服务器已删除")
+                        toast(getString(R.string.server_deleted))
                     }
                 }
             }
@@ -510,20 +510,20 @@ class MainActivity : AppCompatActivity() {
         val input = EditText(this)
         input.setText(server.name)
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("重命名服务器")
+            .setTitle(getString(R.string.rename_server_title))
             .setView(input)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 val name = input.text.toString().trim()
                 if (name.isEmpty()) {
-                    toast("名称不能为空")
+                    toast(getString(R.string.name_empty))
                     return@setPositiveButton
                 }
                 server.name = name
                 serverStore.update(server)
                 rebuildSessionRows()
-                toast("已重命名")
+                toast(getString(R.string.renamed))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -537,7 +537,7 @@ class MainActivity : AppCompatActivity() {
     private fun downloadAttachment(mediaPath: String) {
         val client = currentApi ?: return
         scope.launch {
-            toast("下载中…")
+            toast(getString(R.string.downloading))
             val name = mediaPath.substringAfterLast("/").ifEmpty { "attachment_${System.currentTimeMillis()}" }
             val isApk = name.endsWith(".apk", ignoreCase = true)
 
@@ -548,26 +548,26 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     // 引导用户开启"允许安装未知应用"
                     androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
-                        .setTitle("需要安装权限")
-                        .setMessage("安装 APK 需要开启「允许安装未知应用」权限,现在去设置吗?")
-                        .setPositiveButton("去开启") { _, _ ->
+                        .setTitle(getString(R.string.need_install_perm))
+                        .setMessage(getString(R.string.install_perm_prompt))
+                        .setPositiveButton(getString(R.string.go_enable)) { _, _ ->
                             val intent = android.content.Intent(
                                 android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
                                 android.net.Uri.parse("package:$packageName")
                             )
                             startActivity(intent)
                         }
-                        .setNegativeButton("取消", null)
+                        .setNegativeButton(getString(R.string.cancel), null)
                         .show()
                     return@launch
                 }
                 val target = java.io.File(cacheDir, name)
                 val downloaded = client.downloadFile(mediaPath, target)
                 if (downloaded) {
-                    toast("已下载,开始安装…")
+                    toast(getString(R.string.downloaded_installing))
                     openFile(target)
                 } else {
-                    toast("下载失败")
+                    toast(getString(R.string.download_failed))
                 }
                 return@launch
             }
@@ -576,10 +576,10 @@ class MainActivity : AppCompatActivity() {
                 // Android 10+: MediaStore 保存,拿到 URI 直接打开
                 val uri = client.downloadFileToMediaStore(mediaPath, name, contentResolver)
                 if (uri != null) {
-                    toast("已保存: Download/$name")
+                    toast(getString(R.string.saved_to, name))
                     openUri(uri, name)
                 } else {
-                    toast("下载失败")
+                    toast(getString(R.string.download_failed))
                 }
             } else {
                 // Android 9-: 直接写 Download 目录,用 FileProvider 打开
@@ -592,10 +592,10 @@ class MainActivity : AppCompatActivity() {
                     android.content.Intent(android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
                         .setData(android.net.Uri.fromFile(target))
                         .let { sendBroadcast(it) }
-                    toast("已保存: Download/$name")
+                    toast(getString(R.string.saved_to, name))
                     openFile(target)
                 } else {
-                    toast("下载失败")
+                    toast(getString(R.string.download_failed))
                 }
             }
         }
@@ -610,7 +610,7 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } catch (e: Exception) {
-            toast("已保存,但找不到能打开的应用")
+            toast(getString(R.string.no_app_to_open))
         }
     }
 
@@ -626,7 +626,7 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         } catch (e: Exception) {
-            toast("已保存,但找不到能打开的应用")
+            toast(getString(R.string.no_app_to_open))
         }
     }
 
@@ -648,9 +648,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAttachMenu() {
         if (currentSession == null) return
-        val options = arrayOf("📷 拍照", "🖼 从相册选择", "📁 发送文件")
+        val options = arrayOf(getString(R.string.attach_camera), getString(R.string.attach_gallery), getString(R.string.attach_file))
         androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("发送附件")
+            .setTitle(getString(R.string.attach_menu_title))
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> launchCamera()
@@ -666,7 +666,7 @@ class MainActivity : AppCompatActivity() {
         if (intent.resolveActivity(packageManager) != null) {
             startActivityForResult(intent, REQ_CAMERA)
         } else {
-            toast("没有可用的相机")
+            toast(getString(R.string.no_camera))
         }
     }
 
@@ -675,7 +675,7 @@ class MainActivity : AppCompatActivity() {
             type = "image/*"
         }
         startActivityForResult(
-            android.content.Intent.createChooser(intent, "选择图片"),
+            android.content.Intent.createChooser(intent, getString(R.string.pick_image)),
             REQ_IMAGE
         )
     }
@@ -685,7 +685,7 @@ class MainActivity : AppCompatActivity() {
             type = "*/*"
         }
         startActivityForResult(
-            android.content.Intent.createChooser(intent, "选择文件"),
+            android.content.Intent.createChooser(intent, getString(R.string.pick_file)),
             REQ_FILE
         )
     }
@@ -697,7 +697,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             REQ_CAMERA -> data?.extras?.get("data")?.let { bmp ->
                 sendBitmapImage(bmp as android.graphics.Bitmap)
-            } ?: toast("拍照失败")
+            } ?: toast(getString(R.string.camera_failed))
             REQ_IMAGE -> data?.data?.let { uri ->
                 sendUriImage(uri)
             }
@@ -710,14 +710,14 @@ class MainActivity : AppCompatActivity() {
     private fun sendBitmapImage(bmp: android.graphics.Bitmap) {
         val client = currentApi ?: return
         scope.launch {
-            toast("上传图片中…")
+            toast(getString(R.string.img_uploading))
             val baos = java.io.ByteArrayOutputStream()
             bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos)
             val dataUrl = "data:image/jpeg;base64," +
                 android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP)
             val ok = client.sendImage(currentSession!!.id, dataUrl, "camera_${System.currentTimeMillis()}.jpg", etMessage.text.toString().trim())
             etMessage.setText("")
-            toast(if (ok) "图片已发送" else "发送失败")
+            toast(if (ok) getString(R.string.img_sent) else getString(R.string.msg_failed, "unknown"))
             delay(800)
             refreshMessages()
         }
@@ -726,16 +726,16 @@ class MainActivity : AppCompatActivity() {
     private fun sendUriImage(uri: android.net.Uri) {
         val client = currentApi ?: return
         scope.launch {
-            toast("上传图片中…")
+            toast(getString(R.string.img_uploading))
             val dataUrl = readUriAsDataUrl(uri)
             if (dataUrl == null) {
-                toast("读取图片失败")
+                toast(getString(R.string.read_image_failed))
                 return@launch
             }
             val name = queryFileName(uri) ?: "image_${System.currentTimeMillis()}.jpg"
             val ok = client.sendImage(currentSession!!.id, dataUrl, name, etMessage.text.toString().trim())
             etMessage.setText("")
-            toast(if (ok) "图片已发送" else "发送失败")
+            toast(if (ok) getString(R.string.img_sent) else getString(R.string.msg_failed, "unknown"))
             delay(800)
             refreshMessages()
         }
@@ -744,25 +744,25 @@ class MainActivity : AppCompatActivity() {
     private fun sendUriFile(uri: android.net.Uri) {
         val client = currentApi ?: return
         scope.launch {
-            toast("上传文件中…")
+            toast(getString(R.string.file_uploading))
             val name = queryFileName(uri) ?: "file_${System.currentTimeMillis()}"
             val dataUrl = readUriAsDataUrl(uri)
             if (dataUrl == null) {
-                toast("读取文件失败")
+                toast(getString(R.string.read_file_failed))
                 return@launch
             }
             // 文件放到服务器 /tmp/hermes_upload/ 下,消息里带上路径
             val serverPath = "/tmp/hermes_upload/$name"
             val saved = client.uploadFile(serverPath, dataUrl)
             if (saved == null) {
-                toast("上传失败")
+                toast(getString(R.string.upload_failed))
                 return@launch
             }
             val caption = etMessage.text.toString().trim()
-            val text = if (caption.isEmpty()) "上传了文件: $serverPath" else "$caption\n文件: $serverPath"
+            val text = if (caption.isEmpty()) getString(R.string.file_uploaded, serverPath) else "$caption\n文件: $serverPath"
             val ok = client.sendMessage(currentSession!!.id, text)
             etMessage.setText("")
-            toast(if (ok) "文件已发送" else "发送失败")
+            toast(if (ok) getString(R.string.file_sent) else getString(R.string.msg_failed, "unknown"))
             delay(800)
             refreshMessages()
         }

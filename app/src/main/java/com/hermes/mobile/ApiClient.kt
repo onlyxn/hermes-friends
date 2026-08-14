@@ -139,7 +139,7 @@ class ApiClient(private val context: Context, val server: ServerConfig) {
         }
     }
 
-    class UnauthorizedException : RuntimeException("登录已过期")
+    class UnauthorizedException : RuntimeException("Session expired / unauthorized")
 
     /** 验证当前保存的 cookie 是否仍然有效(调用 /api/auth/me) */
     suspend fun validateSession(): Boolean = withContext(Dispatchers.IO) {
@@ -192,7 +192,7 @@ class ApiClient(private val context: Context, val server: ServerConfig) {
                     id = s.optString("id"),
                     // ③ 与桌面端一致: 优先 title,其次 display_name,最后 session_key
                     displayName = title.ifEmpty {
-                        displayName.ifEmpty { sessionKey.substringAfterLast(":").ifEmpty { "未命名" } }
+                        displayName.ifEmpty { sessionKey.substringAfterLast(":").ifEmpty { "Untitled" } }
                     },
                     source = source,
                     messageCount = s.optInt("message_count", 0),

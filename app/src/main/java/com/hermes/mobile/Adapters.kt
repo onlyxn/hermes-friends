@@ -97,7 +97,7 @@ class SessionAdapter(
                 val h = holder as ItemVH
                 val s = row.session
                 h.name.text = s.displayName
-                h.preview.text = s.preview.ifEmpty { "加载中…" }
+                h.preview.text = s.preview.ifEmpty { h.itemView.context.getString(R.string.loading) }
                 h.time.text = if (s.lastActivity > 0) timeFmt.format(Date(s.lastActivity)) else ""
                 h.itemView.setOnClickListener { onClick(s) }
                 h.itemView.setOnLongClickListener {
@@ -148,12 +148,12 @@ class MessageAdapter(
         if (m.role == "user") {
             holder.layoutUser.visibility = View.VISIBLE
             holder.layoutAssistant.visibility = View.GONE
-            holder.bubbleUser.text = displayText.ifEmpty { "(图片/文件)" }
+            holder.bubbleUser.text = displayText.ifEmpty { holder.itemView.context.getString(R.string.image_or_file) }
             bindDownloadButton(holder.btnDownloadUser, mediaPaths)
         } else {
             holder.layoutUser.visibility = View.GONE
             holder.layoutAssistant.visibility = View.VISIBLE
-            holder.bubbleAssistant.text = displayText.ifEmpty { "(图片/文件)" }
+            holder.bubbleAssistant.text = displayText.ifEmpty { holder.itemView.context.getString(R.string.image_or_file) }
             bindDownloadButton(holder.btnDownloadAssistant, mediaPaths)
         }
     }
@@ -164,7 +164,11 @@ class MessageAdapter(
             return
         }
         btn.visibility = View.VISIBLE
-        btn.text = if (mediaPaths.size == 1) "⬇ 下载附件" else "⬇ 下载附件 (${mediaPaths.size}个)"
+        btn.text = if (mediaPaths.size == 1) {
+            btn.context.getString(R.string.download_attachment)
+        } else {
+            btn.context.getString(R.string.download_attachment_n, mediaPaths.size)
+        }
         btn.setOnClickListener {
             onDownload(mediaPaths.first())
         }
